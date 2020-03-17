@@ -182,7 +182,7 @@ def receive_profile(request):
 
 def receive_pay(request):
     try:
-        content_type = request.META.get('CONTENT_TYPE') or request.META.get['HTTP_CONTENT_TYPE']
+        content_type = request.META.get('CONTENT_TYPE') or request.META.get('HTTP_CONTENT_TYPE')
         if content_type.find('application/json') > -1:
             data = json.loads(request.body)
             if data:
@@ -471,7 +471,7 @@ def _get_client_params(data, os=None):
         'dapp_id': dapp_id,
         'protocol': settings.HEP_PROTOCOL,
         'version': settings.HEP_PROTOCOL_VERSION,
-        'ts': int(datetime.datetime.now().timestamp()),
+        'ts': str(int(datetime.datetime.now().timestamp())),
         'nonce': uuid.uuid4().hex,
         'sign_type': settings.SIGN_TYPE,
     }
@@ -493,8 +493,8 @@ def _get_client_params(data, os=None):
 
 
 def _get_body(request):
-    content_type = request.META.get('CONTENT_TYPE') or request.META.get['HTTP_CONTENT_TYPE']
-    if content_type.find('application/json') > -1:
+    content_type = request.META.get('CONTENT_TYPE') or request.META.get('HTTP_CONTENT_TYPE')
+    if content_type and content_type.find('application/json') > -1:
         data = json.loads(request.body)
         if data:
             request.POST = data
@@ -509,7 +509,9 @@ def get_client_sign_message(request):
         sign_message_data = {
             'message': message,
             'action': settings.ACTION_SIGN_MESSAGE,
+            'uuid': uuid.uuid4().hex
         }
+        sign_message_data = _get_client_params(sign_message_data)
         return http.JsonSuccessResponse(data=sign_message_data)
     except Exception as e:
         logger.exception("get_client_sign_message error:%s" % str(e))
@@ -520,6 +522,7 @@ def get_client_sign_transaction(request):
     try:
         body = _get_body(request)
         sign_transaction_data = {
+            'uuid': uuid.uuid4().hex,
             'action': settings.ACTION_SIGN_TRANSACTION,
             'amount': body.get('amount'),
             'from': body.get('from'),
@@ -529,6 +532,7 @@ def get_client_sign_transaction(request):
             'gas_limit': body.get('gas_limit'),
             'data': body.get('data')
         }
+        sign_transaction_data = _get_client_params(sign_transaction_data)
         return http.JsonSuccessResponse(data=sign_transaction_data)
     except Exception as e:
         logger.exception("get_client_sign_transaction error:%s" % str(e))
