@@ -76,13 +76,17 @@ function requestSignMessage() {
         url: url,
         async: true,
         type: 'post',
-        data: {'message': 'message'},
+        data: {'message': $("#input-sign-message").val()},
         success: function (res) {
             if(res.error_code === 1) {
                 if(hep) {
                     let params = res.result;
                     hep.sign.message(params, function(response) {
-                        alert(response.message);
+                        if(response.status_code === 200) {
+                            document.getElementById("sign-message-result").textContent = "签名信息结果:" + JSON.stringify(response.result);
+                        } else {
+                            document.getElementById("sign-message-result").textContent = "签名信息错误:" + response.message;
+                        }
                     });
                 } else {
                     alert("hep is not inject");
@@ -98,20 +102,24 @@ function requestSignTransaction() {
         url: url,
         async: true,
         type: 'post',
-        data: {'amount': '10',
-                'from': '0xcf25cd19edd8364f12ccf8968a6e8bfcd7ca4604',
-                'to': '0xcf25cd19edd8364f12ccf8968a6e8bfcd7ca4604',
-                'data': '0xcf25cd19edd8364f12ccf8968a6e8bfcd7ca4604',
-                'gas_limit': '21000000',
-                'gas_price': '100',
-                'transaction_count': '1'
+        data: {'amount': $("#input-amount").val(),
+                'from': $("#input-from-address").val(),
+                'to': $('#input-to-address').val(),
+                'data': $('#input-data').val(),
+                'gas_limit': $('#input-gas-limit').val(),
+                'gas_price': $('#input-gas-price').val(),
+                'transaction_count': $('#input-transaction-count').val()
                 },
         success: function (res) {
             if(res.error_code === 1) {
                 if(hep) {
                     let params = res.result;
                     hep.sign.transaction(params, function(response) {
-                        alert(response.message);
+                        if(response.status_code === 200) {
+                            document.getElementById("transaction-result").textContent = "签署交易结果:" + JSON.stringify(response.result);
+                        } else {
+                            document.getElementById("transaction-result").textContent = "签署交易错误:" + response.message;
+                        }
                     });
                 } else {
                     alert("hep is not inject");
